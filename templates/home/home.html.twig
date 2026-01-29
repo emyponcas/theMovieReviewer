@@ -1,20 +1,238 @@
+{# templates/home/home.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Películas Populares - MovieRank{% endblock %}
+
+{% block stylesheets %}
+    {# NO USES {{ parent() }} - Los estilos base ya están cargados #}
+    <style>
+        .movie-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .card-img-top {
+            height: 400px;
+            object-fit: cover;
+        }
+        .movie-rating {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #ffc107;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .movie-adult-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .no-poster {
+            height: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <div class="container mt-4">
+        {# Encabezado #}
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-4 fw-bold">
+                    <i class="fas fa-film text-primary"></i> Películas Populares
+                </h1>
+                <p class="lead">Descubre y valora las películas más populares de TMDB</p>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅ter</h1>
+                {# Estadísticas rápidas - SIN bestMovie y popularMovie por ahora #}
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4 col-6">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">
+                                    <i class="fas fa-video"></i> Total
+                                </h5>
+                                <p class="card-text display-6">{{ movies|length }}</p>
+                                <small>Películas</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">
+                                    <i class="fas fa-calendar-alt"></i> Año
+                                </h5>
+                                <p class="card-text display-6">{{ "now"|date("Y") }}</p>
+                                <small>Actual</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">
+                                    <i class="fas fa-database"></i> Estado
+                                </h5>
+                                <p class="card-text display-6">
+                                    {% if movies|length > 0 %}
+                                        OK
+                                    {% else %}
+                                        Vacía
+                                    {% endif %}
+                                </p>
+                                <small>Base de datos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/emypo/PhpstormProjects/theMovieReviewer/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>C:/Users/emypo/PhpstormProjects/theMovieReviewer/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+        {# Grid de películas #}
+        <div class="row g-4" id="moviesGrid">
+            {% if movies is empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-film fa-2x mb-3"></i>
+                        <h4>No hay películas disponibles</h4>
+                        <p>La base de datos está vacía. Necesitas importar datos desde TMDB.</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% for movie in movies %}
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4 movie-item">
+                    <div class="card movie-card h-100">
+                        {# Badge +18 #}
+                        {% if movie.adult %}
+                            <span class="movie-adult-badge">🔞 +18</span>
+                        {% endif %}
+
+                        {# Rating #}
+                        <div class="movie-rating">
+                            <i class="fas fa-star"></i>
+                            {% if movie.voteAverage %}
+                                {{ movie.voteAverage|number_format(1) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+
+                        {# USA "posterUrl" PQ EL GETTER YA ME DEVUELVE EL ENLACE "MOSTRABLE" #}
+                        {% if movie.posterUrl %}
+                            <img src="https://image.tmdb.org/t/p/w500{{ movie.posterUrl }}"
+                                 class="card-img-top"
+                                 alt="{{ movie.title }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="no-poster">
+                                <div class="text-center">
+                                    <i class="fas fa-film fa-3x mb-2"></i>
+                                    <br>
+                                    {{ movie.title|slice(0, 15) }}...
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            {# Título #}
+                            <h5 class="card-title fw-bold">
+                                {{ movie.title|default('Sin título') }}
+                            </h5>
+
+                            {# Fecha #}
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-calendar-alt"></i>
+                                {% if movie.releaseDate %}
+                                    {{ movie.releaseDate|date('Y') }}
+                                {% else %}
+                                    Sin fecha
+                                {% endif %}
+                            </p>
+
+                            {# Sinopsis corta #}
+                            <p class="card-text flex-grow-1">
+                                {% if movie.overview %}
+                                    {{ movie.overview|slice(0, 100) }}...
+                                {% else %}
+                                    <span class="text-muted">Sin descripción disponible.</span>
+                                {% endif %}
+                            </p>
+
+                            {# Botones de acción #}
+                            <div class="d-flex justify-content-between mt-auto">
+                                <button class="btn btn-outline-primary btn-sm" disabled title="Próximamente">
+                                    <i class="fas fa-info-circle"></i> Detalles
+                                </button>
+
+                                <button class="btn btn-outline-warning btn-sm" disabled title="Inicia sesión para valorar">
+                                    <i class="fas fa-star"></i> Valorar
+                                </button>
+                            </div>
+                        </div>
+
+                        {# Footer con estadísticas #}
+                        <div class="card-footer bg-transparent">
+                            <div class="row text-center">
+                                <div class="col-6 border-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-thumbs-up"></i><br>
+                                        {% if movie.voteCount %}
+                                            {{ movie.voteCount }} votos
+                                        {% else %}
+                                            0 votos
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-chart-line"></i><br>
+                                        {% if movie.popularity %}
+                                            {{ movie.popularity|number_format(0) }}
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {# NO USES {{ parent() }} - jQuery y Bootstrap ya están cargados #}
+    <script>
+        // Efecto hover en cards
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.classList.add('shadow-lg');
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.classList.remove('shadow-lg');
+                });
+            });
+        });
+    </script>
 {% endblock %}
