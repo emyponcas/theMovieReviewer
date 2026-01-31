@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire; #para obtener la apikey
 
 final class AdminController extends AbstractController
 {
@@ -21,17 +22,33 @@ final class AdminController extends AbstractController
     }
 
     #[Route('/admin/movie/load', name: 'data_load')]
-    public function data_load(HttpClientInterface $httpClient, EntityManagerInterface $entityManager): Response
+    public function data_load(HttpClientInterface $httpClient
+        , EntityManagerInterface $entityManager
+        , #[Autowire('%tmdb_api_key%')] string $apiKey
+        , #[Autowire('%tmdb_api_url%')] string $apiUrl
+        , MovieRepository $movieRepository): Response
     {
         #PETICION API
         $response = $httpClient->request(
             'GET',
-            'https://api.themoviedb.org/3/movie/popular?api_key=5964a5054bab9801d48f28b0251960ce&language=es-ES&page=1'
+            $apiUrl . '/movie/popular?api_key=' . $apiKey . '&language=es-ES&page=1'
         );
 
         $content = $response->toArray();
 
+        $peliculasInsertadas = 0;
+        $peliculasDuplicadas = 0;
+
         foreach ($content['results'] as $element) {
+
+            $existingMovie = $movieRepository->findOneBy(['tmdb_id' => $element['id']]);
+
+            if ($existingMovie) {
+                $peliculasDuplicadas++;
+
+                continue; // salto a la siguiente iteración
+            }
+
             $movie = new Movie();
             $movie->setTmdbId($element['id']);
             $movie->setTitle($element['title']);
@@ -50,27 +67,30 @@ final class AdminController extends AbstractController
             $movie->setAdult($element['adult']);
             $movie->setVideo($element['video']);
             $movie->setOriginalLanguage($element['original_language']);
-            if (!empty($element['create_at'])) {
-                $movie->setCreatedAt(new \DateTime($element['create_at']));
-            } else {
-                $movie->setCreatedAt(null);
-            }
-            if (!empty($element['updated_at'])) {
-                $movie->setUpdatedAt(new \DateTime($element['updated_at']));
-            } else {
-                $movie->setUpdatedAt(null);
-            }
+            $movie->setCreatedAt(new \DateTime()); #usa la fecha y hora actual
+            $movie->setUpdatedAt(new \DateTime());
+
+            $peliculasInsertadas++;
 
             $entityManager->persist($movie);
         }
 
         $entityManager->flush();
 
+        $this->addFlash(
+            'success',
+            sprintf('Carga completada: %d nuevas películas insertadas, %d duplicadas omitidas.',
+                $peliculasInsertadas,
+                $peliculasDuplicadas
+            )
+        );
+
 
 
         return $this->render('admin/admin.html.twig', [
             'controller_name' => 'AdminController',
-            'content' => $content,
+            'insertadas' => $peliculasInsertadas,
+            'duplicadas' => $peliculasDuplicadas
         ]);
     }
 }

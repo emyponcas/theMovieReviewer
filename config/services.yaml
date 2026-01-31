@@ -5,6 +5,10 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
+    # parametros para esconder mi api key
+    tmdb_api_key: '%env(TMDB_API_KEY)%'
+    tmdb_api_url: '%env(TMDB_API_URL)%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
