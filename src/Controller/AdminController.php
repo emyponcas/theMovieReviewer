@@ -28,10 +28,12 @@ final class AdminController extends AbstractController
         , #[Autowire('%tmdb_api_url%')] string $apiUrl
         , MovieRepository $movieRepository): Response
     {
+        $randomPage = random_int(1, 500);
+
         #PETICION API
         $response = $httpClient->request(
             'GET',
-            $apiUrl . '/movie/popular?api_key=' . $apiKey . '&language=es-ES&page=1'
+            $apiUrl . '/movie/top_rated?api_key=' . $apiKey . '&language=es-ES&page=' . $randomPage
         );
 
         $content = $response->toArray();

@@ -13,7 +13,7 @@ class HomeController extends AbstractController
     public function home(MovieRepository $movieRepository): Response
     {
         // Solo obtenemos las películas, sin estadísticas complejas
-        $movies = $movieRepository->findAll();
+        $movies = $movieRepository->findAllOrderedByVoteCount();
 
         return $this->render('home/home.html.twig', [
             'movies' => $movies,

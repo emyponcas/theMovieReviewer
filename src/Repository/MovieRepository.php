@@ -16,6 +16,15 @@ class MovieRepository extends ServiceEntityRepository
         parent::__construct($registry, Movie::class);
     }
 
+    #metodo para encontrar por cantidad de votos
+    public function findAllOrderedByVoteCount(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->orderBy('m.vote_count', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Movie[] Returns an array of Movie objects
     //     */
