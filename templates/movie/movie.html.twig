@@ -1,21 +1,34 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MovieController!{% endblock %}
+{% block title %}Películas{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <div class="container mt-4">
+        <h1>Listado de películas</h1>
 
-    {% for movie in movie_list %}
+        <div class="row">
+            {% for movie in movie_list %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
 
-        <p> {{ movie.original_title - movie.poster_path }}</p>
+                        {% if movie.posterUrl %}
+                            <img src="{{ movie.posterUrl }}" class="card-img-top" alt="{{ movie.title }}">
+                        {% endif %}
 
-    {% endfor %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ movie.title }}</h5>
 
-</div>
+                            <a href="{{ path('app_movie_show', { id: movie.id }) }}"
+                               class="btn btn-primary">
+                                Ver detalles
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
 {% endblock %}
