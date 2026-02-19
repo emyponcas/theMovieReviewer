@@ -1,169 +1,247 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-
-    <div class="container mt-4">
-
-        <h1>{{ category.name }}</h1>
-        <p class="text-muted">{{ category.description }}</p>
-
-        <form method="post" id="rankingForm">
-
-            <div class="row" id="movieList">
-
-                {% for movie in movies %}
-
-                    <div class="col-md-3 mb-4 movie-item"
-                         draggable="true"
-                         data-movie-id="{{ movie.id }}">
-
-                        <div class="card bg-dark text-white">
-
-                            <img src="{{ movie.getPosterUrl() }}"
-                                 class="card-img-top">
-
-                            <div class="card-body">
-
-                                <h6 class="card-title">
-                                    {{ movie.title }}
-                                </h6>
-
-                                <input type="hidden"
-                                       name="ranking[{{ movie.id }}]"
-                                       class="ranking-input"
-                                       value="{{ rankingMap[movie.id] ?? loop.index }}">
-
-                                <div class="ranking-number badge bg-primary mt-2">
-                                    Posición: {{ rankingMap[movie.id] ?? loop.index }}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                {% endfor %}
-
-            </div>
-
-            <button class="btn btn-primary mt-3">
-                Guardar ranking
-            </button>
-
-        </form>
-
-        <a href="{{ path('category_leaderboard', {id: category.id}) }}"
-           class="btn btn-warning mb-3">
-
-            Ver Leaderboard
-
-        </a>
-
-
-    </div>
-
+{% block stylesheets %}
     <style>
 
-        .movie-item {
-            cursor: grab;
+        .ranking-container{
+            margin-top:30px;
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:16px;
         }
 
-        .movie-item:active {
-            cursor: grabbing;
+        .ranking-slot{
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:12px;
+            padding:12px;
+            min-height:160px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            position:relative;
+            transition:0.2s;
         }
 
-        .card {
-            transition: transform 0.2s;
+        .slot-label{
+            font-weight:700;
+            margin-bottom:8px;
+            font-size:14px;
+            color:var(--text-secondary);
         }
 
-        .card:hover {
-            transform: scale(1.03);
+        .slot-drop{
+            width:100%;
+            min-height:110px;
+            border:2px dashed var(--border-color);
+            border-radius:10px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:0.2s;
         }
 
-        .dragging {
-            opacity: 0.5;
+        .slot-drop:hover{
+            border-color:var(--accent);
+        }
+
+        .movie-pool{
+            margin-top:40px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+            padding:20px;
+            background:var(--bg-card);
+            border-radius:12px;
+            min-height:140px;
+        }
+
+        .movie-item{
+            width:100px;
+            cursor:grab;
+            transition:0.2s;
+        }
+
+        .movie-item img{
+            width:100%;
+            border-radius:8px;
+            pointer-events:none;
+        }
+
+        .movie-item:hover{
+            transform:scale(1.05);
+        }
+
+        .dragging{
+            opacity:0.5;
+        }
+
+        .ranking-slot[data-position="1"]{
+            border:2px solid gold;
+            box-shadow:0 0 14px rgba(255,215,0,0.6);
+        }
+
+        .ranking-slot[data-position="2"]{
+            border:2px solid silver;
+            box-shadow:0 0 12px rgba(192,192,192,0.6);
+        }
+
+        .ranking-slot[data-position="3"]{
+            border:2px solid #cd7f32;
+            box-shadow:0 0 12px rgba(205,127,50,0.6);
         }
 
     </style>
+{% endblock %}
+
+{% block body %}
+
+    <h1>{{ category.name }}</h1>
+
+    <form method="POST" id="rankingForm">
+
+        <div class="ranking-container">
+
+            {% for i in 1..movies|length %}
+
+                <div class="ranking-slot" data-position="{{ i }}">
+
+                    <div class="slot-label">
+                        #{{ i }}
+                    </div>
+
+                    <div class="slot-drop" data-position="{{ i }}">
+
+                        {% for movie in movies %}
+                            {% if rankingMap[movie.id] is defined and rankingMap[movie.id] == i %}
+
+                                <div
+                                        class="movie-item"
+                                        draggable="true"
+                                        data-movie-id="{{ movie.id }}"
+                                >
+
+                                    <img src="{{ movie.posterUrl }}">
+
+                                </div>
+
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="movie-pool" id="moviePool">
+
+            {% for movie in movies %}
+                {% if rankingMap[movie.id] is not defined %}
+
+                    <div
+                            class="movie-item"
+                            draggable="true"
+                            data-movie-id="{{ movie.id }}"
+                    >
+
+                        <img src="{{ movie.posterUrl }}">
+
+                    </div>
+
+                {% endif %}
+            {% endfor %}
+
+        </div>
+
+        <input type="hidden" name="rankingData" id="rankingData">
+
+        <button class="btn btn-accent mt-4">
+            Guardar ranking
+        </button>
+
+    </form>
+
+{% endblock %}
+
+{% block javascripts %}
 
     <script>
 
-        const list = document.getElementById('movieList');
+        let dragged=null;
+        const pool=document.getElementById("moviePool");
 
-        let draggedItem = null;
+        function initDragEvents(element){
 
-        list.addEventListener('dragstart', function(e){
+            element.addEventListener("dragstart",()=>{
+                dragged=element;
+                element.classList.add("dragging");
+            });
 
-            draggedItem = e.target.closest('.movie-item');
-            draggedItem.classList.add('dragging');
+            element.addEventListener("dragend",()=>{
+                element.classList.remove("dragging");
+            });
+
+        }
+
+        document.querySelectorAll(".movie-item").forEach(initDragEvents);
+
+        document.querySelectorAll(".slot-drop").forEach(slot=>{
+
+            slot.addEventListener("dragover",e=>{
+                e.preventDefault();
+            });
+
+            slot.addEventListener("drop",e=>{
+
+                e.preventDefault();
+
+                if(!dragged) return;
+
+                const existing=slot.querySelector(".movie-item");
+
+                if(existing){
+                    pool.appendChild(existing);
+                }
+
+                slot.appendChild(dragged);
+
+            });
 
         });
 
-        list.addEventListener('dragend', function(){
-
-            draggedItem.classList.remove('dragging');
-            updatePositions();
-
+        pool.addEventListener("dragover",e=>{
+            e.preventDefault();
         });
 
-        list.addEventListener('dragover', function(e){
-
+        pool.addEventListener("drop",e=>{
             e.preventDefault();
 
-            const afterElement = getDragAfterElement(list, e.clientY);
-
-            if(afterElement == null){
-
-                list.appendChild(draggedItem);
-
-            }else{
-
-                list.insertBefore(draggedItem, afterElement);
-
+            if(dragged){
+                pool.appendChild(dragged);
             }
 
         });
 
-        function getDragAfterElement(container, y){
+        document.getElementById("rankingForm").addEventListener("submit",()=>{
 
-            const draggableElements = [...container.querySelectorAll('.movie-item:not(.dragging)')];
+            let data={};
 
-            return draggableElements.reduce((closest, child) => {
+            document.querySelectorAll(".slot-drop").forEach(slot=>{
 
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
+                const movie=slot.querySelector(".movie-item");
 
-                if(offset < 0 && offset > closest.offset){
-
-                    return { offset: offset, element: child };
-
-                }else{
-
-                    return closest;
-
+                if(movie){
+                    data[movie.dataset.movieId]=slot.dataset.position;
                 }
-
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-
-        }
-
-        function updatePositions(){
-
-            const items = document.querySelectorAll('.movie-item');
-
-            items.forEach((item, index) => {
-
-                const input = item.querySelector('.ranking-input');
-                const badge = item.querySelector('.ranking-number');
-
-                input.value = index + 1;
-
-                badge.innerHTML = "Posición: " + (index + 1);
 
             });
 
-        }
+            document.getElementById("rankingData").value=JSON.stringify(data);
+
+        });
 
     </script>
 

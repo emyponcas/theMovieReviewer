@@ -6,6 +6,7 @@ use App\Repository\CategoryRankingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategoryRankingRepository::class)]
+#[ORM\Table(name: 'category_ranking')]
 class CategoryRanking
 {
     #[ORM\Id]
@@ -13,71 +14,80 @@ class CategoryRanking
     #[ORM\Column]
     private ?int $id = null;
 
+
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Category $category = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'id_category', referencedColumnName: 'id', nullable: false)]
+    private ?Category $category = null;
+
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_movie', referencedColumnName: 'id', nullable: false)]
     private ?Movie $movie = null;
+
 
     #[ORM\Column]
     private ?int $position = null;
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
+
     public function getUser(): ?User
     {
         return $this->user;
     }
 
+
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
+
 
     public function getCategory(): ?Category
     {
         return $this->category;
     }
 
+
     public function setCategory(?Category $category): static
     {
         $this->category = $category;
-
         return $this;
     }
+
 
     public function getMovie(): ?Movie
     {
         return $this->movie;
     }
 
+
     public function setMovie(?Movie $movie): static
     {
         $this->movie = $movie;
-
         return $this;
     }
+
 
     public function getPosition(): ?int
     {
         return $this->position;
     }
 
+
     public function setPosition(int $position): static
     {
         $this->position = $position;
-
         return $this;
     }
 }

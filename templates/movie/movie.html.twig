@@ -1,34 +1,240 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Películas{% endblock %}
+{% block title %}Todas las películas{% endblock %}
+
+{% block stylesheets %}
+    <style>
+
+        .page-header{
+            margin-bottom:32px;
+        }
+
+        .page-title{
+            font-weight:800;
+            font-size:2.2rem;
+        }
+
+        .page-subtitle{
+            color:var(--text-secondary);
+            margin-top:6px;
+        }
+
+        .movie-card{
+            background:var(--bg-card);
+            border-radius:14px;
+            overflow:hidden;
+            border:1px solid var(--border-color);
+            transition:transform .18s ease, box-shadow .18s ease;
+            height:100%;
+        }
+
+        .movie-card:hover{
+            transform:translateY(-6px);
+            box-shadow:0 14px 30px rgba(0,0,0,.35);
+        }
+
+        .poster{
+            width:100%;
+            height:420px;
+            object-fit:cover;
+        }
+
+        .no-poster{
+            height:420px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:var(--bg-secondary);
+            color:var(--text-secondary);
+        }
+
+        .movie-body{
+            padding:14px;
+        }
+
+        .movie-title{
+            font-weight:700;
+            font-size:1.05rem;
+            margin-bottom:10px;
+        }
+
+        .movie-actions{
+            display:flex;
+            justify-content:space-between;
+        }
+
+        .btn-movie{
+            border-radius:8px;
+            padding:4px 10px;
+            font-size:.85rem;
+        }
+
+    </style>
+{% endblock %}
 
 {% block body %}
 
-    <div class="container mt-4">
-        <h1>Listado de películas</h1>
+    <div class="page-header">
 
-        <div class="row">
-            {% for movie in movie_list %}
-                <div class="col-md-3 mb-4">
-                    <div class="card h-100">
+        <div class="page-title">
+            Todas las películas
+        </div>
 
-                        {% if movie.posterUrl %}
-                            <img src="{{ movie.posterUrl }}" class="card-img-top" alt="{{ movie.title }}">
-                        {% endif %}
+        <div class="page-subtitle">
+            Explora todo el catálogo disponible
+        </div>
 
-                        <div class="card-body">
-                            <h5 class="card-title">{{ movie.title }}</h5>
+    </div>
 
-                            <a href="{{ path('app_movie_show', { id: movie.id }) }}"
-                               class="btn btn-primary">
-                                Ver detalles
+    <form method="get" class="mb-4">
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+
+                <input
+                        type="text"
+                        name="search"
+                        value="{{ search }}"
+                        class="form-control"
+                        placeholder="Buscar película..."
+                        style="
+                        background:var(--bg-secondary);
+                        border:1px solid var(--border-color);
+                        color:white;
+                        ">
+
+            </div>
+
+            <div class="col-md-4">
+
+                <select
+                        name="language"
+                        class="form-select"
+                        style="
+                        background:var(--bg-secondary);
+                        border:1px solid var(--border-color);
+                        color:white;
+                        ">
+
+                    <option value="">Todos los idiomas</option>
+
+                    <option value="es" {{ language == 'es' ? 'selected' }}>
+                        Español
+                    </option>
+
+                    <option value="en" {{ language == 'en' ? 'selected' }}>
+                        Inglés
+                    </option>
+
+                    <option value="fr" {{ language == 'fr' ? 'selected' }}>
+                        Francés
+                    </option>
+
+                    <option value="it" {{ language == 'it' ? 'selected' }}>
+                        Italiano
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2">
+
+                <button class="btn btn-accent w-100">
+                    Buscar
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+    <div class="row g-4">
+
+        {% if movie_list is empty %}
+
+            <div class="col-12">
+
+                <div class="movie-card p-4 text-center">
+
+                    No hay películas disponibles
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+        {% for movie in movie_list %}
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+
+                <div class="movie-card">
+
+                    {% if movie.posterUrl %}
+
+                        <img
+                                src="https://image.tmdb.org/t/p/w500{{ movie.posterUrl }}"
+                                class="poster"
+                                alt="{{ movie.title }}"
+                        >
+
+                    {% else %}
+
+                        <div class="no-poster">
+                            Sin póster
+                        </div>
+
+                    {% endif %}
+
+                    <div class="movie-body">
+
+                        <div class="movie-title">
+                            {{ movie.title }}
+                        </div>
+
+                        <div class="movie-actions">
+
+                            <a href="{{ path('app_movie_show',{id:movie.id}) }}"
+                               class="btn btn-outline-light btn-sm btn-movie">
+
+                                Detalles
+
                             </a>
+
+                            {% if app.user %}
+
+                                <a href="{{ path('app_movie_show',{id:movie.id}) }}"
+                                   class="btn btn-outline-warning btn-sm btn-movie">
+
+                                    Valorar
+
+                                </a>
+
+                            {% else %}
+
+                                <a href="{{ path('app_login') }}"
+                                   class="btn btn-outline-warning btn-sm btn-movie">
+
+                                    Login
+
+                                </a>
+
+                            {% endif %}
+
                         </div>
 
                     </div>
+
                 </div>
-            {% endfor %}
-        </div>
+
+            </div>
+
+        {% endfor %}
+
     </div>
 
 {% endblock %}

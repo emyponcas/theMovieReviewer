@@ -16,6 +16,29 @@ class ReviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Review::class);
     }
 
+    public function getAverageRatingForMovie(int $movieId): ?float
+    {
+        return $this->createQueryBuilder('r')
+            ->select('AVG(r.rating)')
+            ->where('r.movie = :movieId')
+            ->andWhere('r.isActive = true')
+            ->setParameter('movieId', $movieId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getReviewCountForMovie(int $movieId): int
+    {
+        return $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.movie = :movieId')
+            ->andWhere('r.isActive = true')
+            ->setParameter('movieId', $movieId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+
     //    /**
     //     * @return Review[] Returns an array of Review objects
     //     */

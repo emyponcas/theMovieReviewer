@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <style>
+
+        .page-title{
+            font-size:2rem;
+            font-weight:700;
+            margin-bottom:20px;
+        }
+
+        .review-list{
+            display:flex;
+            flex-direction:column;
+            gap:12px;
+        }
+
+        .review-item{
+            display:flex;
+            gap:14px;
+            background:var(--bg-card);
+            padding:12px;
+            border-radius:10px;
+            align-items:center;
+            transition:0.2s;
+        }
+
+        .review-item:hover{
+            background:var(--bg-hover);
+        }
+
+        .review-item img{
+            width:70px;
+            border-radius:8px;
+        }
+
+        .review-info{
+            flex:1;
+        }
+
+        .review-title{
+            font-weight:600;
+            font-size:15px;
+            margin-bottom:2px;
+        }
+
+        .review-rating{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-top:2px;
+        }
+
+        .stars{
+            display:flex;
+            gap:2px;
+        }
+
+        .star{
+            font-size:16px;
+            color:#374151;
+        }
+
+        .star.full{
+            color:#facc15;
+        }
+
+        .star.half{
+            background:linear-gradient(90deg,#facc15 50%,#374151 50%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        .rating-number{
+            font-size:13px;
+            color:var(--accent);
+            font-weight:600;
+        }
+
+        .review-comment{
+            font-size:13px;
+            color:var(--text-secondary);
+            margin-top:4px;
+        }
+
+        .review-date{
+            font-size:12px;
+            color:var(--text-secondary);
+            margin-top:2px;
+        }
+
+        .review-actions{
+            margin-top:6px;
+        }
+
+        .empty{
+            color:var(--text-secondary);
+        }
+
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <div class="page-title">
+        Mis reviews
+    </div>
+
+    {% if reviews is empty %}
+
+        <div class="empty">
+            No has hecho ninguna review todavía.
+        </div>
+
+    {% else %}
+
+        <div class="review-list">
+
+            {% for review in reviews %}
+
+                {% set rating = review.rating %}
+                {% set fullStars = rating // 2 %}
+                {% set hasHalf = (rating % 2) == 1 %}
+
+                <div class="review-item">
+
+                    <img src="{{ review.movie.posterUrl }}">
+
+                    <div class="review-info">
+
+                        <div class="review-title">
+                            {{ review.movie.title }}
+                        </div>
+
+                        <div class="review-rating">
+
+                            <div class="stars">
+
+                                {% for i in 1..5 %}
+
+                                    {% if i <= fullStars %}
+                                        <span class="star full">★</span>
+
+                                    {% elseif i == fullStars + 1 and hasHalf %}
+                                        <span class="star half">★</span>
+
+                                    {% else %}
+                                        <span class="star">★</span>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="rating-number">
+                                {{ rating }}/10
+                            </div>
+
+                        </div>
+
+                        {% if review.comment %}
+                            <div class="review-comment">
+                                {{ review.comment }}
+                            </div>
+                        {% endif %}
+
+                        <div class="review-date">
+                            {{ review.createdAt|date('d/m/Y') }}
+                        </div>
+
+                        <div class="review-actions">
+
+                            <a href="{{ path('app_movie_show', {id: review.movie.id}) }}"
+                               class="btn btn-sm btn-outline-warning">
+
+                                Editar valoración
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endblock %}

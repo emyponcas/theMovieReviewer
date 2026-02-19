@@ -163,6 +163,11 @@ class Movie
         return sprintf('https://image.tmdb.org/t/p/%s%s', $size, $this->poster_path);
     }
 
+    public function getPosterPath(): ?string
+    {
+        return $this->poster_path;
+    }
+
     public function setPosterPath(?string $poster_path): static
     {
         $this->poster_path = $poster_path;
@@ -176,6 +181,11 @@ class Movie
         }
 
         return sprintf('https://image.tmdb.org/t/p/%s%s', $size, $this->backdrop_path);
+    }
+
+    public function getBackdropPath(): ?string
+    {
+        return $this->backdrop_path;
     }
 
     public function setBackdropPath(?string $backdrop_path): static

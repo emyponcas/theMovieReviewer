@@ -1,20 +1,329 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+
+        .movie-container{
+            display:grid;
+            grid-template-columns:320px 1fr;
+            gap:32px;
+        }
+
+        .poster{
+            width:100%;
+            border-radius:14px;
+            border:1px solid var(--border-color);
+        }
+
+        .no-poster{
+            height:480px;
+            background:var(--bg-card);
+            border-radius:14px;
+            border:1px solid var(--border-color);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--text-secondary);
+        }
+
+        .movie-title{
+            font-size:2.4rem;
+            font-weight:800;
+        }
+
+        .movie-meta{
+            margin-top:8px;
+            color:var(--text-secondary);
+        }
+
+        .movie-overview{
+            margin-top:20px;
+            line-height:1.6;
+            max-width:800px;
+        }
+
+        .review-box{
+            margin-top:40px;
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:14px;
+            padding:20px;
+            max-width:600px;
+        }
+
+        .star-rating{
+            display:flex;
+            gap:10px;
+            cursor:pointer;
+        }
+
+        .star{
+            position:relative;
+            width:34px;
+            height:34px;
+            font-size:34px;
+        }
+
+        .star::before{
+            content:"☆";
+            position:absolute;
+            color:#374151;
+        }
+
+        .star.full::before{
+            content:"★";
+            color:#facc15;
+        }
+
+        .star.half::before{
+            content:"★";
+            background:linear-gradient(90deg,#facc15 50%,#374151 50%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        .rating-value{
+            margin-top:10px;
+            color:var(--text-secondary);
+            font-weight:600;
+        }
+
+        .custom-textarea{
+            background:#111827;
+            border:1px solid #374151;
+            color:#f9fafb;
+            border-radius:8px;
+            width:100%;
+            padding:10px;
+        }
+
+        .custom-textarea:focus{
+            background:#111827;
+            color:#fff;
+            border-color:#facc15;
+            outline:none;
+        }
+
+        .btn-save{
+            margin-top:14px;
+            background:var(--accent);
+            color:black;
+            border:none;
+            border-radius:8px;
+            padding:6px 16px;
+            font-weight:600;
+        }
+
+        .btn-save:hover{
+            background:var(--accent-hover);
+        }
+
+        @media(max-width:768px){
+            .movie-container{
+                grid-template-columns:1fr;
+            }
+        }
+
+    </style>
+{% endblock %}
+
 {% block body %}
 
-    <h1>{{ movie.title }}</h1>
+    <div class="movie-container">
 
-    <p>{{ movie.overview }}</p>
+        <div>
 
-    {% if review_form %}
-        <h3>Tu valoración</h3>
-        {{ form_start(review_form) }}
-        {{ form_row(review_form.rating) }}
-        {{ form_row(review_form.comment) }}
-        <button class="btn btn-primary">Guardar</button>
-        {{ form_end(review_form) }}
-    {% else %}
-        <p>Debes iniciar sesión para valorar esta película.</p>
-    {% endif %}
+            {% if movie.posterPath %}
+
+                <img src="https://image.tmdb.org/t/p/w500{{ movie.posterPath }}"
+                     class="poster">
+
+            {% else %}
+
+                <div class="no-poster">
+                    Sin póster
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <div>
+
+            <div class="movie-title">
+                {{ movie.title }}
+            </div>
+
+            <div class="movie-meta">
+
+                {% if movie.releaseDate %}
+                    {{ movie.releaseDate|date('Y') }}
+                {% endif %}
+
+                {% if movie.voteAverage %}
+                    •
+                    TMDB ⭐ {{ movie.voteAverage|number_format(1) }}/10
+                {% endif %}
+
+                {% if avgRating %}
+                    •
+                    Usuarios ⭐ {{ avgRating|number_format(1) }}/10
+                    ({{ reviewCount }} reviews)
+                {% endif %}
+
+            </div>
+
+
+            <div class="movie-overview">
+
+                {% if movie.overview %}
+                    {{ movie.overview }}
+                {% else %}
+                    Sin descripción disponible
+                {% endif %}
+
+            </div>
+
+            <div class="review-box">
+
+                {% if review_form %}
+
+                    <div class="fw-bold mb-2">
+                        Tu valoración
+                    </div>
+
+                    {{ form_start(review_form) }}
+
+                    <div class="star-rating" id="starRating">
+
+                        <div class="star" data-index="0"></div>
+                        <div class="star" data-index="1"></div>
+                        <div class="star" data-index="2"></div>
+                        <div class="star" data-index="3"></div>
+                        <div class="star" data-index="4"></div>
+
+                    </div>
+
+                    <div class="rating-value" id="ratingValue">
+                        0/10
+                    </div>
+
+                    {{ form_widget(review_form.rating, {
+                        attr:{style:'display:none'}
+                    }) }}
+
+                    <div class="mt-3">
+
+                        {{ form_widget(review_form.comment, {
+                            attr:{
+                                class:'custom-textarea',
+                                rows:4,
+                                placeholder:'Escribe tu opinión...'
+                            }
+                        }) }}
+
+                    </div>
+
+                    <button class="btn-save">
+                        Guardar valoración
+                    </button>
+
+                    {{ form_end(review_form) }}
+
+                {% else %}
+
+                    <a href="{{ path('app_login') }}" class="btn-accent">
+                        Inicia sesión para valorar
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+
+        const stars=document.querySelectorAll(".star");
+        const ratingInput=document.querySelector("#review_rating");
+        const ratingValue=document.querySelector("#ratingValue");
+
+        let currentRating=parseInt(ratingInput.value)||0;
+
+        function renderStars(value){
+
+            stars.forEach((star,index)=>{
+
+                star.classList.remove("full");
+                star.classList.remove("half");
+
+                const starNumber=index+1;
+
+                if(value>=starNumber*2){
+
+                    star.classList.add("full");
+
+                }else if(value===starNumber*2-1){
+
+                    star.classList.add("half");
+
+                }
+
+            });
+
+            ratingValue.innerText=value+"/10";
+
+        }
+
+        function getStarValue(e,index){
+
+            const rect=e.target.getBoundingClientRect();
+            const x=e.clientX-rect.left;
+
+            if(x<rect.width/2){
+                return index*2+1;
+            }else{
+                return index*2+2;
+            }
+
+        }
+
+        stars.forEach((star,index)=>{
+
+            star.addEventListener("mousemove",(e)=>{
+
+                const value=getStarValue(e,index);
+                renderStars(value);
+
+            });
+
+            star.addEventListener("click",(e)=>{
+
+                const value=getStarValue(e,index);
+                currentRating=value;
+                ratingInput.value=value;
+                renderStars(value);
+
+            });
+
+        });
+
+        document.querySelector(".star-rating").addEventListener("mouseleave",()=>{
+
+            renderStars(currentRating);
+
+        });
+
+        renderStars(currentRating);
+
+    </script>
 
 {% endblock %}

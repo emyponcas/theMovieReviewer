@@ -17,16 +17,23 @@ use App\Form\ReviewType;
 final class MovieController extends AbstractController
 {
     #[Route('/movie', name: 'app_movie')]
-    public function index(MovieRepository $repository): Response
-    {
+    public function index(
+        MovieRepository $repository,
+        Request $request
+    ): Response {
 
-        $movie_list = $repository->findAll();
+        $search = $request->query->get('search');
+        $language = $request->query->get('language');
 
+        $movie_list = $repository->searchAndFilter($search, $language);
 
+        $languages = $repository->findAvailableLanguages();
 
         return $this->render('movie/movie.html.twig', [
-            'controller_name' => 'MovieController',
             'movie_list' => $movie_list,
+            'search' => $search,
+            'language' => $language,
+            'languages' => $languages
         ]);
     }
 
@@ -61,15 +68,44 @@ final class MovieController extends AbstractController
                 $em->persist($review);
                 $em->flush();
 
-                return $this->redirectToRoute('app_movie_show', [
+                return $this->redirectToRoute('app_home', [
                     'id' => $movie->getId()
                 ]);
             }
         }
 
+        $avgRating = $reviewRepository->getAverageRatingForMovie($movie->getId());
+        $reviewCount = $reviewRepository->getReviewCountForMovie($movie->getId());
+
         return $this->render('movie/show.html.twig', [
             'movie' => $movie,
             'review_form' => isset($form) ? $form->createView() : null,
+            'avgRating' => $avgRating,
+            'reviewCount' => $reviewCount,
         ]);
+
     }
+
+    #[Route('/mis-reviews', name: 'app_user_reviews')]
+    public function myReviews(\App\Repository\ReviewRepository $reviewRepository): Response
+    {
+
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $reviews = $reviewRepository->findBy(
+            [
+                'user' => $this->getUser(),
+                'isActive' => true
+            ],
+            [
+                'createdAt' => 'DESC'
+            ]
+        );
+
+        return $this->render('movie/my_reviews.html.twig', [
+            'reviews' => $reviews
+        ]);
+
+    }
+
 }

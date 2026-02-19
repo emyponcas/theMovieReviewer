@@ -1,396 +1,271 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Películas Populares - MovieRank{% endblock %}
+{% block title %}Películas Populares{% endblock %}
 
 {% block stylesheets %}
     <style>
-        :root{
-            --bg-0: #070A0F;
-            --bg-1: #0B1020;
 
-            --stroke: rgba(255,255,255,.14);
-            --stroke-2: rgba(255,255,255,.22);
-
-            --text: rgba(255,255,255,.92);
-            --muted: rgba(255,255,255,.65);
-
-            --card-front: rgba(255,255,255,.06);
-            --card-back: rgba(255,255,255,.07);
-
-            --shadow: 0 18px 55px rgba(0,0,0,.65);
+        .page-header{
+            margin-bottom: 32px;
         }
 
-        body{
-            background:
-                    radial-gradient(1200px 700px at 20% -10%, rgba(95,251,255,.08) 0%, transparent 55%),
-                    radial-gradient(900px 600px at 85% 0%, rgba(165,92,255,.08) 0%, transparent 55%),
-                    radial-gradient(900px 700px at 60% 110%, rgba(255,214,102,.05) 0%, transparent 55%),
-                    linear-gradient(180deg, var(--bg-0), var(--bg-1));
-            color: var(--text);
+        .page-title{
+            font-weight: 800;
+            font-size: 2.4rem;
+            letter-spacing: -0.5px;
         }
 
-        .text-muted{ color: var(--muted) !important; }
-        .lead{ color: rgba(255,255,255,.75); }
+        .page-subtitle{
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
 
-        .movie-item{
-            perspective: 1400px;
+        .stats-card{
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stats-number{
+            font-size: 1.8rem;
+            font-weight: 700;
         }
 
         .movie-card{
-            position: relative;
-            border-radius: 18px;
-            height: 540px;
-        }
-
-        .movie-card-inner{
-            position: absolute;
-            inset: 0;
-            border-radius: 18px;
-            transform-style: preserve-3d;
-            transition: transform 700ms cubic-bezier(.2,.8,.2,1);
-            will-change: transform;
-        }
-
-        .movie-card:hover .movie-card-inner,
-        .movie-card:focus-within .movie-card-inner{
-            transform: rotateY(180deg);
-        }
-
-        .movie-face{
-            position: absolute;
-            inset: 0;
-            border-radius: 18px;
+            background: var(--bg-card);
+            border-radius: 14px;
             overflow: hidden;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            border: 1px solid var(--stroke);
-            box-shadow: var(--shadow);
-        }
-
-        .movie-front{
-            background: linear-gradient(180deg, var(--card-front), rgba(255,255,255,.03));
-        }
-
-        .movie-front .poster{
-            position: absolute;
-            inset: 0;
-            width: 100%;
+            border: 1px solid var(--border-color);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
             height: 100%;
+        }
+
+        .movie-card:hover{
+            transform: translateY(-6px);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+        }
+
+        .poster-container{
+            position: relative;
+        }
+
+        .poster{
+            width: 100%;
+            height: 420px;
             object-fit: cover;
-            transform: translateZ(0);
-        }
-
-        .movie-front::after{
-            content:"";
-            position:absolute;
-            inset:0;
-            background:
-                    radial-gradient(120% 90% at 50% 12%, rgba(255,255,255,.10) 0%, transparent 55%),
-                    radial-gradient(110% 90% at 50% 115%, rgba(0,0,0,.70) 0%, transparent 55%),
-                    linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.28));
-            pointer-events:none;
-        }
-
-        .movie-badges{
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .movie-rating,
-        .movie-adult-badge{
-            pointer-events: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.16);
-            background: rgba(0,0,0,.55);
-            box-shadow: 0 10px 22px rgba(0,0,0,.35);
-            font-weight: 800;
-            font-size: .92rem;
-        }
-
-        .movie-rating{ color: #ffd36a; }
-        .movie-adult-badge{
-            background: linear-gradient(135deg, rgba(220,53,69,.95), rgba(255,107,107,.85));
-            color: #fff;
-            border-color: rgba(255,255,255,.18);
-        }
-
-        .movie-back{
-            transform: rotateY(180deg);
-            background:
-                    radial-gradient(900px 420px at 20% 0%, rgba(95,251,255,.10) 0%, transparent 55%),
-                    radial-gradient(900px 420px at 85% 10%, rgba(165,92,255,.10) 0%, transparent 55%),
-                    linear-gradient(180deg, var(--card-back), rgba(255,255,255,.03));
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-color: var(--stroke-2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .movie-back-header{
-            padding: 16px 16px 0 16px;
-        }
-
-        .movie-back-title{
-            font-weight: 800;
-            letter-spacing: .2px;
-            margin-bottom: 6px;
-        }
-
-        .movie-back-meta{
-            color: var(--muted);
-            font-size: .95rem;
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-
-        .movie-back-body{
-            padding: 0 16px 12px 16px;
-            color: rgba(255,255,255,.86);
-        }
-
-        .movie-overview{
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        .movie-back-footer{
-            margin-top: auto;
-            padding: 14px 16px 16px 16px;
-            border-top: 1px solid rgba(255,255,255,.10);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn{ border-radius: 999px; }
-        .btn-outline-primary{
-            border-color: rgba(95,251,255,.45);
-            color: rgba(95,251,255,.92);
-        }
-        .btn-outline-primary:hover{
-            background: rgba(95,251,255,.12);
-            border-color: rgba(95,251,255,.65);
-            color: rgba(255,255,255,.95);
-        }
-        .btn-outline-warning{
-            border-color: rgba(255,214,102,.55);
-            color: rgba(255,214,102,.92);
-        }
-        .btn-outline-warning:hover{
-            background: rgba(255,214,102,.12);
-            border-color: rgba(255,214,102,.75);
-            color: rgba(255,255,255,.95);
         }
 
         .no-poster{
-            position:absolute;
-            inset:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-            padding: 18px;
-            background:
-                    radial-gradient(500px 260px at 30% 10%, rgba(95,251,255,.14) 0%, transparent 60%),
-                    radial-gradient(420px 260px at 80% 20%, rgba(165,92,255,.14) 0%, transparent 60%),
-                    linear-gradient(135deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%);
-            color: rgba(255,255,255,.92);
-            border-bottom: 1px solid rgba(255,255,255,.10);
+            height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
         }
 
-        @media (prefers-reduced-motion: reduce){
-            .movie-card-inner{ transition: none !important; }
+        .movie-body{
+            padding: 14px;
         }
+
+        .movie-title{
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .movie-meta{
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .movie-rating{
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .movie-actions{
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .btn-movie{
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+        }
+
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1 class="display-4 fw-bold">
-                    <i class="fas fa-film text-primary"></i> Películas Populares
-                </h1>
-                <p class="lead">Descubre y valora las películas más populares de TMDB</p>
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4 col-6">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">
-                                    <i class="fas fa-video"></i> Total
-                                </h5>
-                                <p class="card-text display-6">{{ movies|length }}</p>
-                                <small>Películas</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-6">
-                        <div class="card bg-success text-white">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">
-                                    <i class="fas fa-calendar-alt"></i> Año
-                                </h5>
-                                <p class="card-text display-6">{{ "now"|date("Y") }}</p>
-                                <small>Actual</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-6">
-                        <div class="card bg-info text-white">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">
-                                    <i class="fas fa-database"></i> Estado
-                                </h5>
-                                <p class="card-text display-6">
-                                    {% if movies|length > 0 %}
-                                        OK
-                                    {% else %}
-                                        Vacía
-                                    {% endif %}
-                                </p>
-                                <small>Base de datos</small>
-                            </div>
-                        </div>
-                    </div>
+    <div class="page-header">
+
+        <div class="page-title">
+            Películas Populares
+        </div>
+
+        <div class="page-subtitle">
+            Descubre y valora películas de la base de datos
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4 col-6">
+            <div class="stats-card">
+                <div class="stats-number">
+                    {{ movies|length }}
+                </div>
+                <div class="text-secondary">
+                    Películas
                 </div>
             </div>
         </div>
 
-        {# Grid de películas #}
-        <div class="row g-4" id="moviesGrid">
-            {% if movies is empty %}
-                <div class="col-12">
-                    <div class="alert alert-warning text-center">
-                        <i class="fas fa-film fa-2x mb-3"></i>
-                        <h4>No hay películas disponibles</h4>
-                        <p>La base de datos está vacía. Necesitas importar datos desde TMDB.</p>
-                    </div>
+        <div class="col-md-4 col-6">
+            <div class="stats-card">
+                <div class="stats-number">
+                    {{ "now"|date("Y") }}
                 </div>
-            {% endif %}
-
-            {% for movie in movies %}
-                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4 movie-item">
-                    <div class="movie-card" tabindex="0" aria-label="Tarjeta de {{ movie.title|default('película') }}">
-                        <div class="movie-card-inner">
-                            {# FRONT (solo imagen) #}
-                            <div class="movie-face movie-front">
-                                <div class="movie-badges">
-                                    <div>
-                                        {% if movie.adult %}
-                                            <span class="movie-adult-badge">🔞 +18</span>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="movie-rating">
-                                        <i class="fas fa-star"></i>
-                                        {% if movie.voteAverage %}
-                                            {{ movie.voteAverage|number_format(1) }}
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                {% if movie.posterUrl %}
-                                    <img
-                                            src="https://image.tmdb.org/t/p/w500{{ movie.posterUrl }}"
-                                            class="poster"
-                                            alt="{{ movie.title }}"
-                                            loading="lazy"
-                                    >
-                                {% else %}
-                                    <div class="no-poster">
-                                        <div>
-                                            <i class="fas fa-film fa-3x mb-2"></i>
-                                            <div class="fw-bold">{{ movie.title|default('Sin título') }}</div>
-                                            <div class="text-muted">Sin póster</div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            {# BACK (info) #}
-                            <div class="movie-face movie-back">
-                                <div class="movie-back-header">
-                                    <div class="movie-back-title h5 mb-1">
-                                        {{ movie.title|default('Sin título') }}
-                                    </div>
-
-                                    <div class="movie-back-meta">
-                                        <span>
-                                            <i class="fas fa-calendar-alt"></i>
-                                            {% if movie.releaseDate %}
-                                                {{ movie.releaseDate|date('Y') }}
-                                            {% else %}
-                                                Sin fecha
-                                            {% endif %}
-                                        </span>
-
-                                        <span>
-                                            <i class="fas fa-thumbs-up"></i>
-                                            {% if movie.voteCount %}
-                                                {{ movie.voteCount }} votos
-                                            {% else %}
-                                                0 votos
-                                            {% endif %}
-                                        </span>
-
-                                        <span>
-                                            <i class="fas fa-chart-line"></i>
-                                            {% if movie.popularity %}
-                                                {{ movie.popularity|number_format(0) }}
-                                            {% else %}
-                                                0
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="movie-back-body">
-                                    <p class="movie-overview">
-                                        {% if movie.overview %}
-                                            {{ movie.overview|slice(0, 260) }}...
-                                        {% else %}
-                                            <span class="text-muted">Sin descripción disponible.</span>
-                                        {% endif %}
-                                    </p>
-                                </div>
-
-                                <div class="movie-back-footer">
-                                    <button class="btn btn-outline-primary btn-sm" disabled title="Próximamente">
-                                        <i class="fas fa-info-circle"></i> Detalles
-                                    </button>
-
-                                    <button class="btn btn-outline-warning btn-sm" disabled title="Inicia sesión para valorar">
-                                        <i class="fas fa-star"></i> Valorar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="text-secondary">
+                    Año actual
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    </div>
-{% endblock %}
 
-{% block javascripts %}
-    <script>
-    </script>
+        <div class="col-md-4 col-6">
+            <div class="stats-card">
+                <div class="stats-number">
+                    {% if movies|length > 0 %}
+                        OK
+                    {% else %}
+                        Vacía
+                    {% endif %}
+                </div>
+                <div class="text-secondary">
+                    Base de datos
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        {% if movies is empty %}
+
+            <div class="col-12">
+
+                <div class="stats-card">
+
+                    No hay películas disponibles
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+        {% for movie in movies %}
+
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+
+                <div class="movie-card">
+
+                    <div class="poster-container">
+
+                        {% if movie.posterUrl %}
+
+                            <img
+                                    src="https://image.tmdb.org/t/p/w500{{ movie.posterUrl }}"
+                                    class="poster"
+                                    alt="{{ movie.title }}"
+                            >
+
+                        {% else %}
+
+                            <div class="no-poster">
+
+                                Sin póster
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="movie-body">
+
+                        <div class="movie-title">
+                            {{ movie.title }}
+                        </div>
+
+                        <div class="movie-meta">
+
+                            {% if movie.releaseDate %}
+                                {{ movie.releaseDate|date('Y') }}
+                            {% endif %}
+
+                        </div>
+
+                        <div class="movie-rating">
+
+                            <i class="fas fa-star"></i>
+
+                            {% if movie.voteAverage %}
+                                {{ movie.voteAverage|number_format(1) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+
+                        </div>
+
+                        <div class="movie-actions">
+
+                            <a href="{{ path('app_movie_show', { id: movie.id }) }}"
+                               class="btn btn-outline-light btn-sm btn-movie">
+
+                                Detalles
+
+                            </a>
+
+                            {% if app.user %}
+
+                                <a href="{{ path('app_movie_show', { id: movie.id }) }}"
+                                   class="btn btn-outline-warning btn-sm btn-movie">
+
+                                    Valorar
+
+                                </a>
+
+                            {% else %}
+
+                                <a href="{{ path('app_login') }}"
+                                   class="btn btn-outline-warning btn-sm btn-movie">
+
+                                    Login
+
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
 {% endblock %}

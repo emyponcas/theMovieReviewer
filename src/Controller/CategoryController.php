@@ -129,7 +129,7 @@ class CategoryController extends AbstractController
 
             $em->flush();
 
-            $rankingData = $request->request->all('ranking');
+            $rankingData = json_decode($request->request->get('rankingData'), true);
 
             foreach ($rankingData as $movieId => $position) {
 
@@ -150,7 +150,7 @@ class CategoryController extends AbstractController
 
             $em->flush();
 
-            return $this->redirectToRoute('public_category_show', [
+            return $this->redirectToRoute('public_category_index', [
                 'id' => $category->getId()
             ]);
 

@@ -25,6 +25,39 @@ class MovieRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function searchAndFilter(?string $search, ?string $language): array
+    {
+        $qb = $this->createQueryBuilder('m');
+
+        $qb->andWhere('m.isActive = true');
+
+        if ($search) {
+            $qb->andWhere('LOWER(m.title) LIKE LOWER(:search)')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        if ($language) {
+            $qb->andWhere('m.original_language = :language')
+                ->setParameter('language', $language);
+        }
+
+        $qb->orderBy('m.title', 'ASC');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findAvailableLanguages(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->select('DISTINCT m.original_language')
+            ->where('m.original_language IS NOT NULL')
+            ->andWhere('m.isActive = true')
+            ->orderBy('m.original_language', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
+
+
     //    /**
     //     * @return Movie[] Returns an array of Movie objects
     //     */

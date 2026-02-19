@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire; #para obtener la apikey
+use Symfony\Component\HttpFoundation\Request;
+use App\Form\MovieType;
 
 final class AdminController extends AbstractController
 {
@@ -93,4 +95,30 @@ final class AdminController extends AbstractController
             'duplicadas' => $peliculasDuplicadas
         ]);
     }
+
+    #[Route('/admin/movie/new', name: 'admin_movie_new')]
+    public function newMovie(Request $request, EntityManagerInterface $em): Response
+    {
+        $movie = new Movie();
+
+        $form = $this->createForm(MovieType::class, $movie);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $movie->setTmdbId(random_int(1000000, 9999999));
+
+            $em->persist($movie);
+
+            $em->flush();
+
+            return $this->redirectToRoute('admin_site');
+        }
+
+        return $this->render('admin/movieForm.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
 }

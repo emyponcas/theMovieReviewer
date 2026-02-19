@@ -8,30 +8,42 @@
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🎬</text></svg>">
 
-    {# Bootstrap #}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {# Icons #}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    {# FontAwesome #}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-    {# Google Fonts #}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.1/css/flag-icons.min.css">
+
 
     <style>
 
         :root {
-            --primary-color: #0d6efd;
-            --secondary-color: #6c757d;
-            --accent-color: #ffc107;
+            --bg-main: #0f172a;
+            --bg-secondary: #111827;
+            --bg-card: #1f2937;
+            --bg-hover: #374151;
+
+            --text-main: #f9fafb;
+            --text-secondary: #9ca3af;
+
+            --accent: #facc15;
+            --accent-hover: #eab308;
+
+            --border-color: #374151;
+        }
+
+        html, body {
+            height: 100%;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
         }
@@ -40,72 +52,137 @@
             flex: 1;
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--accent-color) !important;
+        .navbar {
+            background-color: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .footer {
-            background-color: #343a40;
-            color: white;
-            margin-top: auto;
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--accent) !important;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .nav-link:hover {
-            color: var(--accent-color) !important;
+            color: var(--text-main) !important;
+        }
+
+        .nav-link.active {
+            color: var(--accent) !important;
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: black;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 6px 14px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .dropdown-item {
+            color: var(--text-secondary);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+        }
+
+        .dropdown-divider {
+            border-color: var(--border-color);
+        }
+
+        .container-main {
+            max-width: 1300px;
+        }
+
+        .footer {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            border-radius: 10px;
         }
 
     </style>
 
     {% block stylesheets %}{% endblock %}
+
 </head>
 
 <body>
 
-{# ================= NAVBAR ================= #}
+<nav class="navbar navbar-expand-lg shadow-sm">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-
-    <div class="container">
+    <div class="container container-main">
 
         <a class="navbar-brand" href="{{ path('app_home') }}">
-            <i class="fas fa-film me-2"></i>
             theMovieReviewer
         </a>
 
-        <button class="navbar-toggler" type="button"
+        <button class="navbar-toggler text-white"
+                type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarNav">
 
-            <span class="navbar-toggler-icon"></span>
+            <i class="fas fa-bars"></i>
 
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
 
-            {# LEFT SIDE #}
             <ul class="navbar-nav me-auto">
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_home') }}">
-                        <i class="fas fa-home me-1"></i>
+                    <a class="nav-link"
+                       href="{{ path('app_home') }}">
                         Inicio
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="{{ path('app_movie') }}">
+                        Películas
                     </a>
                 </li>
 
                 {% if app.user %}
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('data_load') }}">
-                            <i class="fas fa-download me-1"></i>
-                            Cargar películas
+                        <a class="nav-link"
+                           href="{{ path('app_user_reviews') }}">
+                            Mis reviews
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-star me-1"></i>
-                            Mis reviews
+                        <a class="nav-link"
+                           href="{{ path('public_category_index') }}">
+                            Categorías
                         </a>
                     </li>
 
@@ -114,12 +191,9 @@
                 {% if is_granted('ROLE_ADMIN') %}
 
                     <li class="nav-item">
-                        <a class="nav-link text-warning"
+                        <a class="nav-link"
                            href="{{ path('admin_site') }}">
-
-                            <i class="fas fa-lock me-1"></i>
-                            Panel Admin
-
+                            Admin
                         </a>
                     </li>
 
@@ -127,9 +201,7 @@
 
             </ul>
 
-            {# RIGHT SIDE USER MENU #}
-
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
 
                 {% if app.user %}
 
@@ -137,10 +209,7 @@
 
                         <a class="nav-link dropdown-toggle"
                            href="#"
-                           role="button"
                            data-bs-toggle="dropdown">
-
-                            <i class="fas fa-user me-1"></i>
 
                             {{ app.user.email }}
 
@@ -149,31 +218,24 @@
                         <ul class="dropdown-menu dropdown-menu-end">
 
                             <li>
-                                <span class="dropdown-item-text text-muted">
-                                    Conectado como:
-                                    <strong>{{ app.user.email }}</strong>
-                                </span>
+<span class="dropdown-item-text">
+{{ app.user.email }}
+</span>
                             </li>
 
                             <li><hr class="dropdown-divider"></li>
 
                             <li>
                                 <a class="dropdown-item"
-                                   href="#">
-
-                                    <i class="fas fa-user-circle me-1"></i>
-                                    Mi perfil
-
+                                   href="{{ path('app_user_reviews') }}">
+                                    Mis reviews
                                 </a>
                             </li>
 
                             <li>
                                 <a class="dropdown-item text-danger"
                                    href="{{ path('app_logout') }}">
-
-                                    <i class="fas fa-sign-out-alt me-1"></i>
                                     Logout
-
                                 </a>
                             </li>
 
@@ -183,28 +245,18 @@
 
                 {% else %}
 
-                    <li class="nav-item">
-
+                    <li class="nav-item me-2">
                         <a class="nav-link"
                            href="{{ path('app_login') }}">
-
-                            <i class="fas fa-sign-in-alt me-1"></i>
                             Login
-
                         </a>
-
                     </li>
 
                     <li class="nav-item">
-
-                        <a class="nav-link btn btn-warning text-dark ms-2 px-3"
+                        <a class="btn-accent"
                            href="{{ path('app_register') }}">
-
-                            <i class="fas fa-user-plus me-1"></i>
                             Register
-
                         </a>
-
                     </li>
 
                 {% endif %}
@@ -217,14 +269,9 @@
 
 </nav>
 
-
-{# ================= MAIN ================= #}
-
 <main class="py-4">
 
-    <div class="container">
-
-        {# FLASH MESSAGES #}
+    <div class="container container-main">
 
         {% for label, messages in app.flashes %}
 
@@ -245,38 +292,27 @@
 
         {% endfor %}
 
-
         {% block body %}{% endblock %}
 
     </div>
 
 </main>
 
-
-{# ================= FOOTER ================= #}
-
 <footer class="footer py-4 mt-5">
 
-    <div class="container text-center">
+    <div class="container container-main text-center">
 
-        <p class="mb-0">
-            <i class="fas fa-heart text-danger"></i>
+        <div class="mb-1 fw-semibold">
             theMovieReviewer
-        </p>
+        </div>
 
-        <small class="text-muted">
-
+        <small>
             © {{ "now"|date("Y") }}
-            Proyecto Symfony + TMDB API
-
         </small>
 
     </div>
 
 </footer>
-
-
-{# ================= SCRIPTS ================= #}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
