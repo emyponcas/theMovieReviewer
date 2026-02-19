@@ -9,7 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MovieRepository::class)]
-#[ORM\Table(name: 'movie', schema: 'the_movie_reviewer')]
+#[ORM\Table(name: 'movie')]
+#[ORM\HasLifecycleCallbacks]
 class Movie
 {
     #[ORM\Id]
@@ -26,7 +27,7 @@ class Movie
     #[ORM\Column(name: 'original_title', length: 255, nullable: true)]
     private ?string $original_title = null;
 
-    #[ORM\Column(name: 'overview', length: 255, nullable: true)]
+    #[ORM\Column(name: 'overview', type: Types::TEXT, nullable: true)]
     private ?string $overview = null;
 
     #[ORM\Column(name: 'release_date', type: Types::DATE_MUTABLE, nullable: true)]
@@ -56,21 +57,41 @@ class Movie
     #[ORM\Column(name: 'original_language', length: 255, nullable: true)]
     private ?string $original_language = null;
 
-    #[ORM\Column(name: 'created_at', nullable: true)]
-    private ?\DateTime $created_at = null;
+    #[ORM\Column(name: 'is_active', type: 'boolean')]
+    private bool $isActive = true;
 
-    #[ORM\Column(name: 'updated_at', nullable: true)]
-    private ?\DateTime $updated_at = null;
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
+    private ?\DateTimeInterface $created_at = null;
 
-    /**
-     * @var Collection<int, Review>
-     */
+    #[ORM\Column(name: 'updated_at', type: 'datetime')]
+    private ?\DateTimeInterface $updated_at = null;
+
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'movie')]
     private Collection $reviews;
+
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class, mappedBy: 'movies')]
+    private Collection $categories;
 
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
+        $this->categories = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int
@@ -86,7 +107,6 @@ class Movie
     public function setTmdbId(int $tmdb_id): static
     {
         $this->tmdb_id = $tmdb_id;
-
         return $this;
     }
 
@@ -98,7 +118,6 @@ class Movie
     public function setTitle(?string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -110,7 +129,6 @@ class Movie
     public function setOriginalTitle(?string $original_title): static
     {
         $this->original_title = $original_title;
-
         return $this;
     }
 
@@ -122,7 +140,6 @@ class Movie
     public function setOverview(?string $overview): static
     {
         $this->overview = $overview;
-
         return $this;
     }
 
@@ -134,7 +151,6 @@ class Movie
     public function setReleaseDate(?\DateTime $release_date): static
     {
         $this->release_date = $release_date;
-
         return $this;
     }
 
@@ -144,16 +160,12 @@ class Movie
             return null;
         }
 
-        return sprintf('https://image.tmdb.org/t/p/%s%s',
-            $size,
-            $this->poster_path
-        );
+        return sprintf('https://image.tmdb.org/t/p/%s%s', $size, $this->poster_path);
     }
 
     public function setPosterPath(?string $poster_path): static
     {
         $this->poster_path = $poster_path;
-
         return $this;
     }
 
@@ -163,16 +175,12 @@ class Movie
             return null;
         }
 
-        return sprintf('https://image.tmdb.org/t/p/%s%s',
-            $size,
-            $this->backdrop_path
-        );
+        return sprintf('https://image.tmdb.org/t/p/%s%s', $size, $this->backdrop_path);
     }
 
     public function setBackdropPath(?string $backdrop_path): static
     {
         $this->backdrop_path = $backdrop_path;
-
         return $this;
     }
 
@@ -184,7 +192,6 @@ class Movie
     public function setPopularity(?string $popularity): static
     {
         $this->popularity = $popularity;
-
         return $this;
     }
 
@@ -196,7 +203,6 @@ class Movie
     public function setVoteAverage(?string $vote_average): static
     {
         $this->vote_average = $vote_average;
-
         return $this;
     }
 
@@ -208,7 +214,6 @@ class Movie
     public function setVoteCount(?int $vote_count): static
     {
         $this->vote_count = $vote_count;
-
         return $this;
     }
 
@@ -220,7 +225,6 @@ class Movie
     public function setAdult(?bool $adult): static
     {
         $this->adult = $adult;
-
         return $this;
     }
 
@@ -232,7 +236,6 @@ class Movie
     public function setVideo(?bool $video): static
     {
         $this->video = $video;
-
         return $this;
     }
 
@@ -244,37 +247,30 @@ class Movie
     public function setOriginalLanguage(?string $original_language): static
     {
         $this->original_language = $original_language;
-
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(?\DateTime $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTime
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?\DateTime $updated_at): static
-    {
-        $this->updated_at = $updated_at;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Review>
-     */
     public function getReviews(): Collection
     {
         return $this->reviews;
@@ -286,19 +282,41 @@ class Movie
             $this->reviews->add($review);
             $review->setMovie($this);
         }
-
         return $this;
     }
 
     public function removeReview(Review $review): static
     {
         if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
             if ($review->getMovie() === $this) {
                 $review->setMovie(null);
             }
         }
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+            $category->addMovie($this);
+        }
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        if ($this->categories->removeElement($category)) {
+            $category->removeMovie($this);
+        }
         return $this;
     }
 }

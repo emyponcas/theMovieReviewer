@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container mt-4">
+
+        <h1>Categorías</h1>
+
+        <div class="row">
+
+            {% for category in categories %}
+
+                <div class="col-md-4 mb-4">
+
+                    <a href="{{ path('public_category_show', {id: category.id}) }}"
+                       class="text-decoration-none">
+
+                        <div class="category-card p-4">
+
+                            <h4>{{ category.name }}</h4>
+
+                            <p>{{ category.description }}</p>
+
+                            <span class="badge bg-info">
+{{ category.movies|length }} películas
+</span>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <style>
+
+        .category-card {
+            background: linear-gradient(135deg, #1f1f2e, #2b2b40);
+            color: white;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+    </style>
+
+{% endblock %}

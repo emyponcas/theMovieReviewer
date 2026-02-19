@@ -69,8 +69,6 @@ final class AdminController extends AbstractController
             $movie->setAdult($element['adult']);
             $movie->setVideo($element['video']);
             $movie->setOriginalLanguage($element['original_language']);
-            $movie->setCreatedAt(new \DateTime()); #usa la fecha y hora actual
-            $movie->setUpdatedAt(new \DateTime());
 
             $peliculasInsertadas++;
 

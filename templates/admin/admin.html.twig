@@ -1,31 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AdminController!{% endblock %}
-
 {% block body %}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
-    {% endfor %}
 
-    {% for message in app.flashes('warning') %}
-        <div class="alert alert-warning">
-            {{ message }}
-        </div>
-    {% endfor %}
+    <div class="container mt-4">
 
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
-        </div>
-    {% endfor %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+        <h1 class="mb-4 text-center">Panel de Administración</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-</div>
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <a href="{{ path('app_category_index') }}" class="admin-card text-decoration-none">
+                    <div class="p-4">
+                        <h4>Categorías</h4>
+                        <p class="text-muted">Ver y gestionar categorías</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{{ path('app_category_new') }}" class="admin-card text-decoration-none">
+                    <div class="p-4">
+                        <h4>Crear categoría</h4>
+                        <p class="text-muted">Crear una nueva categoría</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="{{ path('data_load') }}" class="admin-card text-decoration-none">
+                    <div class="p-4">
+                        <h4>Cargar películas</h4>
+                        <p class="text-muted">Importar películas desde TMDB</p>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <style>
+
+        .admin-card {
+
+            display: block;
+            background: linear-gradient(135deg, #1f1f2e, #2b2b40);
+            color: white;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+
+        }
+
+        .admin-card:hover {
+
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+
+        }
+
+    </style>
+
 {% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container mt-4">
+
+        <h1 class="mb-4 text-center">Crear categoría</h1>
+
+        {{ form_start(form) }}
+
+        <div class="mb-3">
+            {{ form_row(form.name) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_row(form.description) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">
+            Guardar categoría
+        </button>
+
+        <h3 class="mt-4 mb-3">Buscar y seleccionar películas</h3>
+
+        <input type="text"
+               id="movie-search"
+               class="form-control mb-4"
+               placeholder="Buscar película...">
+
+        <div class="row" id="movies-container">
+
+            {% for movie in movies %}
+
+                <div class="col-md-3 mb-4 movie-wrapper"
+                     data-title="{{ movie.title|lower }}">
+
+                    <div class="movie-card"
+                         onclick="toggleMovie({{ movie.id }})"
+                         id="card-{{ movie.id }}">
+
+                        <img src="{{ movie.getPosterUrl() }}"
+                             class="img-fluid rounded">
+
+                        <div class="movie-title">
+                            {{ movie.title }}
+                        </div>
+
+                    </div>
+
+                    <input type="checkbox"
+                           name="selected_movies[]"
+                           value="{{ movie.id }}"
+                           id="movie-{{ movie.id }}"
+                           style="display:none;">
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        {{ form_end(form) }}
+
+    </div>
+
+    <style>
+
+        .movie-card {
+
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border-radius: 12px;
+            overflow: hidden;
+
+        }
+
+        .movie-card:hover {
+
+            transform: scale(1.05);
+
+        }
+
+        .movie-card.selected {
+
+            border: 3px solid #0d6efd;
+            box-shadow: 0 0 15px rgba(13,110,253,0.6);
+
+        }
+
+        .movie-title {
+
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 500;
+
+        }
+
+    </style>
+
+    <script>
+
+        function toggleMovie(id)
+        {
+
+            let checkbox = document.getElementById('movie-' + id);
+            let card = document.getElementById('card-' + id);
+
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked)
+            {
+                card.classList.add('selected');
+            }
+            else
+            {
+                card.classList.remove('selected');
+            }
+
+        }
+
+
+        document.getElementById('movie-search').addEventListener('keyup', function()
+        {
+
+            let value = this.value.toLowerCase();
+
+            let movies = document.querySelectorAll('.movie-wrapper');
+
+            movies.forEach(function(movie)
+            {
+
+                let title = movie.getAttribute('data-title');
+
+                if (title.includes(value))
+                {
+                    movie.style.display = '';
+                }
+                else
+                {
+                    movie.style.display = 'none';
+                }
+
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

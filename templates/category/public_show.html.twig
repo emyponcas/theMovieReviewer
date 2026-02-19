@@ -1,0 +1,170 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container mt-4">
+
+        <h1>{{ category.name }}</h1>
+        <p class="text-muted">{{ category.description }}</p>
+
+        <form method="post" id="rankingForm">
+
+            <div class="row" id="movieList">
+
+                {% for movie in movies %}
+
+                    <div class="col-md-3 mb-4 movie-item"
+                         draggable="true"
+                         data-movie-id="{{ movie.id }}">
+
+                        <div class="card bg-dark text-white">
+
+                            <img src="{{ movie.getPosterUrl() }}"
+                                 class="card-img-top">
+
+                            <div class="card-body">
+
+                                <h6 class="card-title">
+                                    {{ movie.title }}
+                                </h6>
+
+                                <input type="hidden"
+                                       name="ranking[{{ movie.id }}]"
+                                       class="ranking-input"
+                                       value="{{ rankingMap[movie.id] ?? loop.index }}">
+
+                                <div class="ranking-number badge bg-primary mt-2">
+                                    Posición: {{ rankingMap[movie.id] ?? loop.index }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <button class="btn btn-primary mt-3">
+                Guardar ranking
+            </button>
+
+        </form>
+
+        <a href="{{ path('category_leaderboard', {id: category.id}) }}"
+           class="btn btn-warning mb-3">
+
+            Ver Leaderboard
+
+        </a>
+
+
+    </div>
+
+    <style>
+
+        .movie-item {
+            cursor: grab;
+        }
+
+        .movie-item:active {
+            cursor: grabbing;
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+    </style>
+
+    <script>
+
+        const list = document.getElementById('movieList');
+
+        let draggedItem = null;
+
+        list.addEventListener('dragstart', function(e){
+
+            draggedItem = e.target.closest('.movie-item');
+            draggedItem.classList.add('dragging');
+
+        });
+
+        list.addEventListener('dragend', function(){
+
+            draggedItem.classList.remove('dragging');
+            updatePositions();
+
+        });
+
+        list.addEventListener('dragover', function(e){
+
+            e.preventDefault();
+
+            const afterElement = getDragAfterElement(list, e.clientY);
+
+            if(afterElement == null){
+
+                list.appendChild(draggedItem);
+
+            }else{
+
+                list.insertBefore(draggedItem, afterElement);
+
+            }
+
+        });
+
+        function getDragAfterElement(container, y){
+
+            const draggableElements = [...container.querySelectorAll('.movie-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+
+                if(offset < 0 && offset > closest.offset){
+
+                    return { offset: offset, element: child };
+
+                }else{
+
+                    return closest;
+
+                }
+
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+
+        }
+
+        function updatePositions(){
+
+            const items = document.querySelectorAll('.movie-item');
+
+            items.forEach((item, index) => {
+
+                const input = item.querySelector('.ranking-input');
+                const badge = item.querySelector('.ranking-number');
+
+                input.value = index + 1;
+
+                badge.innerHTML = "Posición: " + (index + 1);
+
+            });
+
+        }
+
+    </script>
+
+{% endblock %}
