@@ -12,9 +12,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire; #para obtener la apikey
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\MovieType;
+use App\Repository\UserRepository;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\ReviewRepository;
+use App\Repository\CategoryRepository;
 
 final class AdminController extends AbstractController
 {
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/admin', name: 'admin_site')]
     public function index(): Response
     {
@@ -23,6 +28,7 @@ final class AdminController extends AbstractController
         return $this->render('admin/admin.html.twig');
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/admin/movie/load', name: 'data_load')]
     public function data_load(HttpClientInterface $httpClient
         , EntityManagerInterface $entityManager
@@ -96,6 +102,7 @@ final class AdminController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/admin/movie/new', name: 'admin_movie_new')]
     public function newMovie(Request $request, EntityManagerInterface $em): Response
     {
@@ -118,6 +125,53 @@ final class AdminController extends AbstractController
 
         return $this->render('admin/movieForm.html.twig', [
             'form' => $form->createView()
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/admin/users', name: 'admin_users')]
+    public function users(UserRepository $userRepository): Response
+    {
+        $users = $userRepository->findBy([], ['id' => 'DESC']);
+
+        return $this->render('admin/users.html.twig', [
+            'users' => $users
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/admin/stats', name: 'admin_stats')]
+    public function stats(
+        UserRepository $userRepository,
+        MovieRepository $movieRepository,
+        ReviewRepository $reviewRepository,
+        CategoryRepository $categoryRepository
+    ): Response {
+
+        $topUser = $reviewRepository->getTopUser();
+
+        $topMovie = $reviewRepository->getTopMovie();
+
+        return $this->render('admin/stats.html.twig', [
+
+            'totalUsers' => $userRepository->count([]),
+
+            'totalMovies' => $movieRepository->count([
+                'isActive' => true
+            ]),
+
+            'totalReviews' => $reviewRepository->count([
+                'isActive' => true
+            ]),
+
+            'totalCategories' => $categoryRepository->count([
+                'isActive' => true
+            ]),
+
+            'topUser' => $topUser,
+
+            'topMovie' => $topMovie
+
         ]);
     }
 

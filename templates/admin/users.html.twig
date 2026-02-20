@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestión de usuarios{% endblock %}
+
+{% block body %}
+
+    <div class="admin-container">
+
+        <div class="admin-header">
+            <h1>Gestión de usuarios</h1>
+            <p class="admin-subtitle">
+                {{ users|length }} usuarios registrados
+            </p>
+        </div>
+
+        <div class="admin-card">
+
+            <table class="admin-table">
+
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Registrado</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                {% for user in users %}
+
+                    <tr>
+                        <td>{{ user.id }}</td>
+
+                        <td>
+                            <strong>{{ user.email }}</strong>
+                        </td>
+
+                        <td>
+                            {% for role in user.roles %}
+                                <span class="role-badge">{{ role }}</span>
+                            {% endfor %}
+                        </td>
+
+                        <td>
+                            {{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '-' }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <style>
+
+        .admin-container{
+            max-width:1100px;
+        }
+
+        .admin-header{
+            margin-bottom:25px;
+        }
+
+        .admin-subtitle{
+            color:var(--text-secondary);
+        }
+
+        .admin-card{
+            background:var(--bg-card);
+            border-radius:12px;
+            padding:20px;
+            border:1px solid var(--border-color);
+        }
+
+        .admin-table{
+            width:100%;
+        }
+
+        .admin-table th{
+            color:var(--text-secondary);
+            padding:12px;
+        }
+
+        .admin-table td{
+            padding:12px;
+        }
+
+        .role-badge{
+            background:#facc15;
+            color:black;
+            padding:3px 8px;
+            border-radius:6px;
+            font-size:.8rem;
+            margin-right:4px;
+        }
+
+    </style>
+
+{% endblock %}

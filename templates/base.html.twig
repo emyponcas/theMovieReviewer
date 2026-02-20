@@ -218,19 +218,12 @@
                         <ul class="dropdown-menu dropdown-menu-end">
 
                             <li>
-<span class="dropdown-item-text">
-{{ app.user.email }}
-</span>
+                                <span class="dropdown-item">
+                                {{ app.user.email }}
+                                </span>
                             </li>
 
                             <li><hr class="dropdown-divider"></li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                   href="{{ path('app_user_reviews') }}">
-                                    Mis reviews
-                                </a>
-                            </li>
 
                             <li>
                                 <a class="dropdown-item text-danger"
@@ -307,7 +300,7 @@
         </div>
 
         <small>
-            © {{ "now"|date("Y") }}
+            ©{{ "now"|date("Y") }}  made by <strong>emyponcas</strong> developer.
         </small>
 
     </div>

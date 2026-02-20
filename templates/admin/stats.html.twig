@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Estadísticas{% endblock %}
+
+{% block body %}
+
+    <div class="container mt-4">
+
+        <h1 class="admin-title mb-4">
+            Estadísticas de la aplicación
+        </h1>
+
+        <div class="row g-4">
+
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Usuarios
+                    </div>
+
+                    <div class="stat-number">
+                        {{ totalUsers }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Películas
+                    </div>
+
+                    <div class="stat-number">
+                        {{ totalMovies }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Reviews
+                    </div>
+
+                    <div class="stat-number">
+                        {{ totalReviews }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Categorías
+                    </div>
+
+                    <div class="stat-number">
+                        {{ totalCategories }}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row g-4 mt-2">
+
+            <div class="col-md-6">
+
+                <div class="stat-card highlight">
+
+                    <div class="stat-label">
+                        Usuario con más valoraciones
+                    </div>
+
+                    {% if topUser %}
+
+                        <div class="stat-highlight">
+                            {{ topUser.email }}
+                        </div>
+
+                        <div class="stat-sub">
+                            {{ topUser.total }} valoraciones
+                        </div>
+
+                    {% else %}
+
+                        <div class="stat-sub">
+                            Sin datos
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+                <div class="stat-card highlight">
+
+                    <div class="stat-label">
+                        Película más valorada
+                    </div>
+
+                    {% if topMovie %}
+
+                        <div class="stat-highlight">
+                            {{ topMovie.title }}
+                        </div>
+
+                        <div class="stat-sub">
+                            {{ topMovie.total }} valoraciones
+                        </div>
+
+                    {% else %}
+
+                        <div class="stat-sub">
+                            Sin datos
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <style>
+
+        .admin-title{
+            font-weight:800;
+            font-size:2.4rem;
+        }
+
+        .stat-card{
+
+            background:var(--bg-card);
+            padding:28px;
+            border-radius:16px;
+            border:1px solid var(--border-color);
+
+            transition:all .2s ease;
+
+        }
+
+        .stat-card:hover{
+
+            transform:translateY(-4px);
+            box-shadow:0 14px 30px rgba(0,0,0,.4);
+
+        }
+
+        .stat-label{
+
+            font-size:14px;
+            color:var(--text-secondary);
+
+        }
+
+        .stat-number{
+
+            font-size:32px;
+            font-weight:800;
+            color:var(--accent);
+            margin-top:6px;
+
+        }
+
+        .stat-highlight{
+
+            font-size:20px;
+            font-weight:700;
+            color:var(--accent);
+            margin-top:6px;
+
+        }
+
+        .stat-sub{
+
+            font-size:13px;
+            color:var(--text-secondary);
+            margin-top:4px;
+
+        }
+
+        .highlight{
+
+            border-left:4px solid var(--accent);
+
+        }
+
+    </style>
+
+{% endblock %}

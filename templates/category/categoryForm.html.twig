@@ -1,148 +1,327 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
+{% block title %}
+    Crear categoría
+{% endblock %}
 
-    <div class="container mt-4">
-
-        <h1 class="mb-4 text-center">Crear categoría</h1>
-
-        {{ form_start(form) }}
-
-        <div class="mb-3">
-            {{ form_row(form.name) }}
-        </div>
-
-        <div class="mb-3">
-            {{ form_row(form.description) }}
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">
-            Guardar categoría
-        </button>
-
-        <h3 class="mt-4 mb-3">Buscar y seleccionar películas</h3>
-
-        <input type="text"
-               id="movie-search"
-               class="form-control mb-4"
-               placeholder="Buscar película...">
-
-        <div class="row" id="movies-container">
-
-            {% for movie in movies %}
-
-                <div class="col-md-3 mb-4 movie-wrapper"
-                     data-title="{{ movie.title|lower }}">
-
-                    <div class="movie-card"
-                         onclick="toggleMovie({{ movie.id }})"
-                         id="card-{{ movie.id }}">
-
-                        <img src="{{ movie.getPosterUrl() }}"
-                             class="img-fluid rounded">
-
-                        <div class="movie-title">
-                            {{ movie.title }}
-                        </div>
-
-                    </div>
-
-                    <input type="checkbox"
-                           name="selected_movies[]"
-                           value="{{ movie.id }}"
-                           id="movie-{{ movie.id }}"
-                           style="display:none;">
-
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-        {{ form_end(form) }}
-
-    </div>
-
+{% block stylesheets %}
     <style>
 
-        .movie-card {
-
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border-radius: 12px;
-            overflow: hidden;
-
+        .page-header{
+            margin-bottom:30px;
         }
 
-        .movie-card:hover {
-
-            transform: scale(1.05);
-
+        .page-title{
+            font-size:2rem;
+            font-weight:800;
         }
 
-        .movie-card.selected {
-
-            border: 3px solid #0d6efd;
-            box-shadow: 0 0 15px rgba(13,110,253,0.6);
-
+        .page-subtitle{
+            color:var(--text-secondary);
         }
 
-        .movie-title {
+        /* layout principal */
 
-            text-align: center;
-            margin-top: 8px;
-            font-weight: 500;
+        .category-layout{
+            display:grid;
+            grid-template-columns: 320px 1fr;
+            gap:30px;
+        }
 
+        /* panel izquierdo */
+
+        .category-panel{
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:14px;
+            padding:20px;
+            height:fit-content;
+        }
+
+        .form-label{
+            font-weight:600;
+            margin-bottom:6px;
+        }
+
+        .form-control{
+            background:var(--bg-secondary);
+            border:1px solid var(--border-color);
+            color:white;
+        }
+
+        .form-control::placeholder{
+            color:#9ca3af;
+        }
+
+        .form-control:focus{
+            background:var(--bg-secondary);
+            color:white;
+            border-color:var(--accent);
+            box-shadow:none;
+        }
+
+        /* contador */
+
+        .selected-count{
+            margin-top:15px;
+            font-size:14px;
+            color:var(--text-secondary);
+        }
+
+        /* panel derecho */
+
+        .movie-panel{
+            background:var(--bg-card);
+            border:1px solid var(--border-color);
+            border-radius:14px;
+            padding:20px;
+        }
+
+        /* buscador */
+
+        .movie-search{
+            margin-bottom:18px;
+        }
+
+        /* grid */
+
+        .movie-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+            gap:14px;
+        }
+
+        /* card */
+
+        .movie-card{
+            background:var(--bg-secondary);
+            border:2px solid transparent;
+            border-radius:10px;
+            overflow:hidden;
+            cursor:pointer;
+            transition:all .18s ease;
+        }
+
+        .movie-card:hover{
+            transform:translateY(-3px);
+            border-color:var(--accent);
+        }
+
+        .movie-card.selected{
+            border-color:var(--accent);
+            box-shadow:0 0 12px rgba(250,204,21,.4);
+        }
+
+        .movie-poster{
+            width:100%;
+            height:200px;
+            object-fit:cover;
+        }
+
+        .movie-title{
+            padding:8px;
+            font-size:.85rem;
+            font-weight:600;
+            text-align:center;
+        }
+
+        /* botones */
+
+        .save-btn{
+            width:100%;
+            margin-top:20px;
         }
 
     </style>
+{% endblock %}
+
+{% block body %}
+
+    <div class="page-header">
+
+        <div class="page-title">
+            Nueva categoría
+        </div>
+
+        <div class="page-subtitle">
+            Crea una nueva categoría y selecciona las películas que la compondrán
+        </div>
+
+    </div>
+
+
+    {{ form_start(form) }}
+
+    <div class="category-layout">
+
+        <!-- PANEL IZQUIERDO -->
+        <div class="category-panel">
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Nombre
+                </label>
+
+                {{ form_widget(form.name,{
+                    attr:{
+                        class:"form-control",
+                        placeholder:"Ej: Mejores películas de Nolan"
+                    }
+                }) }}
+            </div>
+
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Descripción
+                </label>
+
+                {{ form_widget(form.description,{
+                    attr:{
+                        class:"form-control",
+                        rows:4,
+                        placeholder:"Describe la categoría..."
+                    }
+                }) }}
+            </div>
+
+
+            <div class="selected-count">
+                Películas seleccionadas:
+                <strong id="selected-count">0</strong>
+            </div>
+
+
+            <button class="btn btn-accent save-btn">
+                Crear categoría
+            </button>
+
+        </div>
+
+
+
+        <!-- PANEL DERECHO -->
+        <div class="movie-panel">
+
+            <input
+                    type="text"
+                    id="movie-search"
+                    class="form-control movie-search"
+                    placeholder="Buscar película..."
+            >
+
+
+            <div class="movie-grid" id="movies-container">
+
+                {% for movie in movies %}
+
+                    <div class="movie-wrapper"
+                         data-title="{{ movie.title|lower }}">
+
+                        <div class="movie-card"
+                             onclick="toggleMovie({{ movie.id }})"
+                             id="card-{{ movie.id }}">
+
+                            {% if movie.posterUrl %}
+
+                                <img src="{{ movie.posterUrl }}"
+                                     class="movie-poster">
+
+                            {% endif %}
+
+                            <div class="movie-title">
+                                {{ movie.title }}
+                            </div>
+
+                        </div>
+
+
+                        <input
+                                type="checkbox"
+                                name="selected_movies[]"
+                                value="{{ movie.id }}"
+                                id="movie-{{ movie.id }}"
+                                style="display:none;">
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {{ form_end(form) }}
+
+{% endblock %}
+
+
+
+{% block javascripts %}
 
     <script>
 
+        let selectedCount = 0;
+
         function toggleMovie(id)
         {
+            const checkbox =
+                document.getElementById('movie-' + id);
 
-            let checkbox = document.getElementById('movie-' + id);
-            let card = document.getElementById('card-' + id);
+            const card =
+                document.getElementById('card-' + id);
+
 
             checkbox.checked = !checkbox.checked;
 
-            if (checkbox.checked)
+            if(checkbox.checked)
             {
                 card.classList.add('selected');
+                selectedCount++;
             }
             else
             {
                 card.classList.remove('selected');
+                selectedCount--;
             }
 
+            updateCount();
         }
 
 
-        document.getElementById('movie-search').addEventListener('keyup', function()
+        function updateCount()
         {
+            document.getElementById('selected-count')
+                .innerText = selectedCount;
+        }
 
-            let value = this.value.toLowerCase();
 
-            let movies = document.querySelectorAll('.movie-wrapper');
+        /* buscador */
 
-            movies.forEach(function(movie)
+        document.getElementById('movie-search')
+            .addEventListener('input',function()
             {
 
-                let title = movie.getAttribute('data-title');
+                const value =
+                    this.value.toLowerCase();
 
-                if (title.includes(value))
-                {
-                    movie.style.display = '';
-                }
-                else
-                {
-                    movie.style.display = 'none';
-                }
+                document.querySelectorAll('.movie-wrapper')
+                    .forEach(function(movie)
+                    {
+
+                        const title =
+                            movie.dataset.title;
+
+                        movie.style.display =
+                            title.includes(value)
+                                ? ''
+                                : 'none';
+
+                    });
 
             });
-
-        });
 
     </script>
 

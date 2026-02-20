@@ -18,23 +18,28 @@ final class MovieController extends AbstractController
 {
     #[Route('/movie', name: 'app_movie')]
     public function index(
-        MovieRepository $repository,
-        Request $request
-    ): Response {
+        Request $request,
+        MovieRepository $repository
+    ): Response
+    {
 
         $search = $request->query->get('search');
         $language = $request->query->get('language');
+        $year = $request->query->get('year');
 
-        $movie_list = $repository->searchAndFilter($search, $language);
-
-        $languages = $repository->findAvailableLanguages();
+        $movie_list = $repository->searchAndFilter(
+            $search,
+            $language,
+            $year
+        );
 
         return $this->render('movie/movie.html.twig', [
             'movie_list' => $movie_list,
             'search' => $search,
             'language' => $language,
-            'languages' => $languages
+            'year' => $year
         ]);
+
     }
 
     #[Route('/movie/{id}', name: 'app_movie_show')]

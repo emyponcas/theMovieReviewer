@@ -21,16 +21,17 @@ class CategoryController extends AbstractController
     #[Route('/admin/category', name: 'app_category_index')]
     public function index(CategoryRepository $categoryRepository): Response
     {
+
         $categories = $categoryRepository->findBy(
-            ['isActive' => true],
+            [],
             ['createdAt' => 'DESC']
         );
 
         return $this->render('category/index.html.twig', [
-            'categories' => $categories,
+            'categories' => $categories
         ]);
-    }
 
+    }
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/admin/category/new', name: 'app_category_new')]
     public function new(
@@ -191,6 +192,108 @@ class CategoryController extends AbstractController
         ]);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/admin/category/{id}/edit', name: 'app_category_edit')]
+    public function edit(
+        Category $category,
+        Request $request,
+        EntityManagerInterface $em,
+        MovieRepository $movieRepository,
+        CategoryRankingRepository $rankingRepository
+    ): Response {
 
+        $form = $this->createForm(CategoryType::class, $category);
+
+        $form->handleRequest($request);
+
+        $movies = $movieRepository->findBy(
+            ['isActive' => true],
+            ['title' => 'ASC']
+        );
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $selectedMoviesIds = $request->request->all('selected_movies') ?? [];
+
+            $currentMovies = $category->getMovies();
+
+            foreach ($currentMovies as $movie) {
+
+                if (!in_array($movie->getId(), $selectedMoviesIds)) {
+
+                    $rankings = $rankingRepository->findBy([
+                        'category' => $category,
+                        'movie' => $movie
+                    ]);
+
+                    foreach ($rankings as $ranking) {
+                        $em->remove($ranking);
+                    }
+
+                    $category->removeMovie($movie);
+                }
+            }
+
+            foreach ($selectedMoviesIds as $movieId) {
+
+                $movie = $movieRepository->find($movieId);
+
+                if ($movie && !$category->getMovies()->contains($movie)) {
+                    $category->addMovie($movie);
+                }
+
+            }
+
+            $em->flush();
+
+            return $this->redirectToRoute('app_category_index');
+
+        }
+
+        $selectedIds = [];
+
+        foreach ($category->getMovies() as $movie) {
+            $selectedIds[] = $movie->getId();
+        }
+
+        return $this->render('category/categoryEdit.html.twig', [
+            'form' => $form->createView(),
+            'movies' => $movies,
+            'selectedIds' => $selectedIds,
+            'category' => $category
+        ]);
+
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/admin/category/{id}/delete', name: 'app_category_delete', methods:['POST'])]
+    public function delete(
+        Category $category,
+        EntityManagerInterface $em
+    ): Response {
+
+        $category->setIsActive(false);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Categoría eliminada correctamente');
+
+        return $this->redirectToRoute('app_category_index');
+
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/admin/category/{id}/restore', name: 'app_category_restore', methods:['POST'])]
+    public function restore(Category $category, EntityManagerInterface $em): Response {
+
+        $category->setIsActive(true);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Categoría restaurada');
+
+        return $this->redirectToRoute('app_category_index');
+
+    }
 
 }

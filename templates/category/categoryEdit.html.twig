@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar categoría{% endblock %}
+
+{% block body %}
+
+    <div class="admin-container">
+
+        <div class="header">
+
+            <h1>Editar categoría</h1>
+
+            <a href="{{ path('app_category_index') }}" class="btn-back">
+                ← Volver
+            </a>
+
+        </div>
+
+        {{ form_start(form) }}
+
+        <div class="form-box">
+
+            <div class="form-group">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+        </div>
+
+        <div class="movies-section">
+
+            <h2>Películas seleccionadas</h2>
+
+            <input type="text"
+                   id="movie-search"
+                   class="search-input"
+                   placeholder="Buscar película...">
+
+            <button class="btn-save">
+                Guardar cambios
+            </button>
+
+            <div class="movies-grid">
+
+                {% for movie in movies %}
+
+                    {% set isSelected = movie.id in selectedIds %}
+
+                    <div class="movie-wrapper"
+                         data-title="{{ movie.title|lower }}">
+
+                        <div class="movie-card {{ isSelected ? 'selected' }}"
+                             onclick="toggleMovie({{ movie.id }})"
+                             id="card-{{ movie.id }}">
+
+                            <img src="{{ movie.posterUrl }}">
+
+                            <div class="movie-title">
+                                {{ movie.title }}
+                            </div>
+
+                        </div>
+
+                        <input type="checkbox"
+                               name="selected_movies[]"
+                               value="{{ movie.id }}"
+                               id="movie-{{ movie.id }}"
+                                {{ isSelected ? 'checked' }}
+                               hidden>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {{ form_end(form) }}
+
+    </div>
+
+
+    <style>
+
+        .admin-container{
+
+            max-width:1200px;
+            margin:auto;
+
+        }
+
+        .header{
+
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:30px;
+
+        }
+
+        .form-box{
+
+            background:var(--bg-card);
+            padding:20px;
+            border-radius:10px;
+            margin-bottom:30px;
+
+        }
+
+        .form-group{
+
+            margin-bottom:15px;
+
+        }
+
+        .movies-grid{
+
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+            gap:15px;
+
+        }
+
+        .movie-card{
+
+            cursor:pointer;
+            border-radius:10px;
+            overflow:hidden;
+            border:2px solid transparent;
+            transition:0.2s;
+
+        }
+
+        .movie-card.selected{
+
+            border:2px solid var(--accent);
+            box-shadow:0 0 10px var(--accent);
+
+        }
+
+        .movie-card img{
+
+            width:100%;
+            height:240px;
+            object-fit:cover;
+
+        }
+
+        .movie-title{
+
+            padding:6px;
+            font-size:.85rem;
+            text-align:center;
+
+        }
+
+        .btn-save{
+
+            margin-top:20px;
+            background:var(--accent);
+            border:none;
+            padding:10px 20px;
+            border-radius:8px;
+            font-weight:600;
+
+        }
+
+        .search-input{
+
+            margin-bottom:20px;
+            background:var(--bg-secondary);
+            border:1px solid var(--border-color);
+            color:white;
+
+        }
+
+    </style>
+
+
+    <script>
+
+        function toggleMovie(id){
+
+            let checkbox=document.getElementById('movie-'+id);
+            let card=document.getElementById('card-'+id);
+
+            checkbox.checked=!checkbox.checked;
+
+            card.classList.toggle('selected');
+
+        }
+
+        document.getElementById('movie-search').addEventListener('keyup',function(){
+
+            let value=this.value.toLowerCase();
+
+            document.querySelectorAll('.movie-wrapper').forEach(movie=>{
+
+                movie.style.display=
+                    movie.dataset.title.includes(value)?'block':'none';
+
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

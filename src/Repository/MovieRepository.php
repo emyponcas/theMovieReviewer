@@ -25,25 +25,46 @@ class MovieRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function searchAndFilter(?string $search, ?string $language): array
+    public function searchAndFilter(
+        ?string $search,
+        ?string $language,
+        ?string $year
+    ): array
     {
-        $qb = $this->createQueryBuilder('m');
 
-        $qb->andWhere('m.isActive = true');
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.isActive = true');
 
         if ($search) {
+
             $qb->andWhere('LOWER(m.title) LIKE LOWER(:search)')
                 ->setParameter('search', '%' . $search . '%');
+
         }
 
         if ($language) {
+
             $qb->andWhere('m.original_language = :language')
                 ->setParameter('language', $language);
+
         }
 
-        $qb->orderBy('m.title', 'ASC');
+        if ($year) {
 
-        return $qb->getQuery()->getResult();
+            $startDate = new \DateTime($year . '-01-01');
+            $endDate = new \DateTime($year . '-12-31');
+
+            $qb->andWhere('m.release_date BETWEEN :startDate AND :endDate')
+                ->setParameter('startDate', $startDate)
+                ->setParameter('endDate', $endDate);
+
+        }
+
+        return $qb
+            ->orderBy('m.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+
     }
 
     public function findAvailableLanguages(): array

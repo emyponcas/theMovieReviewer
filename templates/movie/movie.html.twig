@@ -69,6 +69,41 @@
             font-size:.85rem;
         }
 
+
+        .search-input,
+        .search-select{
+
+            background:var(--bg-secondary);
+            border:1px solid var(--border-color);
+            color:white;
+            height:42px;
+
+        }
+
+        .search-input::placeholder{
+
+            color:rgba(255,255,255,0.75);
+            opacity:1;
+
+        }
+
+        .search-input:focus,
+        .search-select:focus{
+
+            background:var(--bg-secondary);
+            color:white;
+            border-color:var(--accent);
+            box-shadow:none;
+
+        }
+
+        .search-button{
+
+            height:42px;
+            font-weight:600;
+
+        }
+
     </style>
 {% endblock %}
 
@@ -88,34 +123,24 @@
 
     <form method="get" class="mb-4">
 
-        <div class="row g-3">
+        <div class="row g-3 align-items-center">
 
-            <div class="col-md-6">
+            <div class="col-lg-5 col-md-4">
 
                 <input
                         type="text"
                         name="search"
                         value="{{ search }}"
-                        class="form-control"
-                        placeholder="Buscar película..."
-                        style="
-                        background:var(--bg-secondary);
-                        border:1px solid var(--border-color);
-                        color:white;
-                        ">
+                        class="form-control search-input"
+                        placeholder="Buscar película...">
 
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-3">
 
                 <select
                         name="language"
-                        class="form-select"
-                        style="
-                        background:var(--bg-secondary);
-                        border:1px solid var(--border-color);
-                        color:white;
-                        ">
+                        class="form-select search-select">
 
                     <option value="">Todos los idiomas</option>
 
@@ -139,9 +164,27 @@
 
             </div>
 
-            <div class="col-md-2">
+            <div class="col-lg-2 col-md-3">
 
-                <button class="btn btn-accent w-100">
+                <select
+                        name="year"
+                        class="form-select search-select">
+
+                    <option value="">Año</option>
+
+                    {% for y in "now"|date("Y")..1980 %}
+                        <option value="{{ y }}" {{ year == y ? 'selected' }}>
+                            {{ y }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+
+                <button class="btn btn-accent w-100 search-button">
                     Buscar
                 </button>
 

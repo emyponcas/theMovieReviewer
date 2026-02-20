@@ -38,6 +38,31 @@ class ReviewRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function getTopUser(): ?array
+    {
+        return $this->createQueryBuilder('r')
+            ->select('u.email as email, COUNT(r.id) as total')
+            ->join('r.user', 'u')
+            ->where('r.isActive = true')
+            ->groupBy('u.id')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getTopMovie(): ?array
+    {
+        return $this->createQueryBuilder('r')
+            ->select('m.title as title, COUNT(r.id) as total')
+            ->join('r.movie', 'm')
+            ->where('r.isActive = true')
+            ->groupBy('m.id')
+            ->orderBy('total', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
     //    /**
     //     * @return Review[] Returns an array of Review objects
